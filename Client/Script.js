@@ -1,7 +1,13 @@
+if (process.argv[2]  == 0) {
+    var BASE_URL = 'https://lichessmlbot.onrender.com'
+} else {
+    var BASE_URL = 'http://localhosst:3000'
+}
+
 var moves = [];
 
 setInterval(async ()=> {
-    const res = await fetch('http://localhost:3000/moves')
+    const res = await fetch(`${BASE_URL}/moves`)
     const data = await res.json()
     
     if (data !== null) {
@@ -18,7 +24,7 @@ async function sendMove(move) {
     if (move != null) {
         console.log("Arg:", move);
 
-        const res = await fetch('http://localhost:3000/move', {
+        const res = await fetch(`${BASE_URL}/move`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -33,4 +39,4 @@ async function sendMove(move) {
     }
 }
 
-sendMove(process.argv[2]);
+sendMove(process.argv[3]);
