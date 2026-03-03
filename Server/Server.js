@@ -3,10 +3,9 @@ import cors from 'cors'
 import { getMoves, getGame, postMove } from './LichessStream.js'
 
 const app = express()
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors())
-app.use(express.static('../Client'))
 app.use(express.json())
 
 app.get('/moves', (req, res) => {
@@ -16,11 +15,12 @@ app.get('/moves', (req, res) => {
 
 app.post('/move', (req, res) => {
     const { move } = req.body;
-    console.log("moved");
-    postMove(move);
     if (!move) {
-        return res.status(400)
+        return res.status(400).json({ error: "Move is required" });
     }
+    console.log("Move received:", move);
+    postMove(move);
+    return res.status(200).json({ success:true })
 })
 
 app.get('/getGame', (req, res) => {
@@ -29,5 +29,5 @@ app.get('/getGame', (req, res) => {
 })
 
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`)
+    console.log(`Server running on ${PORT}`)
 })
