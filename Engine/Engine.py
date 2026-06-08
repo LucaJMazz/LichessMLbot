@@ -11,7 +11,7 @@ import chess
 # Env:
 #  - SERVER_BASE: base URL of your Node middleman (default http://localhost:3000)
 #  - API_POST_KEY: API key sent in header "x-post-key" to authorize POST /move
-SERVER_BASE = os.environ.get("SERVER_BASE", "http://localhost:3000")
+SERVER_BASE = os.environ.get("SERVER_BASE", "https://lichessmlbot.onrender.com")
 STREAM_URL = f"{SERVER_BASE}/stream"   # SSE endpoint served by Server/Server.js
 MOVE_URL = f"{SERVER_BASE}/move"       # POST endpoint served by Server/Server.js
 API_POST_KEY = os.environ.get("API_POST_KEY")
@@ -100,7 +100,7 @@ def run_event_loop():
     """
     logging.info("Connecting to SSE %s", STREAM_URL)
     # Keep the request simple; sseclient wraps the streaming response for iteration
-    resp = requests.get(STREAM_URL, stream=True, timeout=60)
+    resp = requests.get(STREAM_URL, stream=True, timeout=(10, None))
     client = sseclient.SSEClient(resp)
     for event in client.events():
         # Some servers send event.event == "message" or custom names like "move".
