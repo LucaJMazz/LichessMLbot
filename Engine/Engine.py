@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 import time
 import json
 import random
@@ -11,10 +13,16 @@ import chess
 # Env:
 #  - SERVER_BASE: base URL of your Node middleman (default http://localhost:3000)
 #  - API_POST_KEY: API key sent in header "x-post-key" to authorize POST /move
-SERVER_BASE = os.environ.get("SERVER_BASE", "https://lichessmlbot.onrender.com")
+
+env_path = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(env_path)
+SERVER_BASE = os.environ.get("SERVER_BASE", "http://localhost:3000")
 STREAM_URL = f"{SERVER_BASE}/stream"   # SSE endpoint served by Server/Server.js
 MOVE_URL = f"{SERVER_BASE}/move"       # POST endpoint served by Server/Server.js
 API_POST_KEY = os.environ.get("API_POST_KEY")
+
+if not API_POST_KEY:
+    logging.warning("API_POST_KEY not set — POST /move will be rejected (403)")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
@@ -69,10 +77,13 @@ def send_move(move):
     - Posts JSON {"move": move} to MOVE_URL.
     - Returns True on success, False on failure (and logs the error).
     """
+    print(move)
     if not move:
         logging.info("No move to send")
         return False
-    headers = {"x-post-key": API_POST_KEY} if API_POST_KEY else {}
+    headers = {"x-post-key": API_POST_KEY, "Content-Type": "application/json"} if API_POST_KEY else {"Content-Type": "application/json"}
+    # log before sending (guaranteed to appear with logging)
+    logging.info("Attempting to send move=%s to %s headers=%s", move, MOVE_URL, {k: ("***" if k=="x-post-key" else v) for k,v in headers.items()})
     try:
         res = requests.post(MOVE_URL, json={"move": move}, headers=headers, timeout=15)
         res.raise_for_status()
@@ -102,6 +113,7 @@ def run_event_loop():
     # Keep the request simple; sseclient wraps the streaming response for iteration
     resp = requests.get(STREAM_URL, stream=True, timeout=(10, None))
     client = sseclient.SSEClient(resp)
+    print("Running event loop")
     for event in client.events():
         # Some servers send event.event == "message" or custom names like "move".
         # We attempt to parse any event data payload as JSON and look for "moves".
@@ -121,6 +133,7 @@ def run_event_loop():
         # Build board from move list and choose/send a move
         board = build_board_from_moves(moves)
         move = choose_move(board)
+        logging.info("Chosen move: %s", move)
         if move:
             send_move(move)
 

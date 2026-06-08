@@ -1,3 +1,12 @@
+import { config } from 'dotenv'
+import { fileURLToPath } from 'url'
+import { dirname, resolve } from 'path'
+
+// load .env from project root (one level up from Server/)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+config({ path: resolve(__dirname, '..', '.env') })
+
 import express from 'express'
 import cors from 'cors'
 import { gameEvents, postMove, getColor, getFen, getMoves, getStatus, getTurn } from './LichessStream.js'
