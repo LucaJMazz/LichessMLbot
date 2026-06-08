@@ -1,2 +1,0 @@
-- Benchmark: have the bot consistently beat Ethan Dinglasan in games
-- Create a frontend side to the server that lets you play against a more evil and ragebaiting version of Oscar
