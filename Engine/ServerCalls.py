@@ -2,7 +2,7 @@ import requests
 import sseclient
 import json
 
-SERVER_URL = "https://your-server-url/stream"
+SERVER_URL = "https://lichessmlbot.onrender.com/stream"
 
 response = requests.get(SERVER_URL, stream=True)
 client = sseclient.SSEClient(response)
