@@ -1,7 +1,22 @@
 import requests
-import time
+import sseclient
+import json
 
-SERVER_URL = "https://lichessmlbot.onrender.com"
+SERVER_URL = "https://your-server-url/stream"
+
+response = requests.get(SERVER_URL, stream=True)
+client = sseclient.SSEClient(response)
+
+for event in client.events():
+    if event.event == "move":
+        data = json.loads(event.data)
+        print("Move received:", data)
+
+        fen = data["fen"]
+
+        #move = calculate_move(fen)  # your engine
+
+        send_move(move)
 
 def get_position():
     try:
@@ -11,9 +26,6 @@ def get_position():
     except Exception as e:
         print("Error fetching moves", e);
         return None
-    
-def calculate_move(fen):
-    return "e2e4"
 
 def send_move(move):
     try:
@@ -25,17 +37,3 @@ def send_move(move):
         print("Move sent:", move)
     except Exception as e:
         print("Error sending move:", e)
-        
-def main():
-    while True:
-        fen = get_position()
-        
-        if fen:
-            move = calculate_move(fen)
-            if move:
-                send_move(move)
-                
-        time.sleep(2);
-        
-if __name__ == "__main__":
-    main()
